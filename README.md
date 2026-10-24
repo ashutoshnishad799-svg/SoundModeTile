@@ -33,3 +33,14 @@ APK: `app/build/outputs/apk/debug/app-debug.apk`
 ## GitHub Actions
 
 Push to `main` or `master`, or run **Build Sound Mode Tile APK** from Actions. Download the APK from the workflow run's Artifacts section.
+
+
+## Release APK and system-app module
+GitHub Actions builds a signed release APK and a Magisk/KernelSU-compatible module ZIP. Install the APK normally for testing. To make it a system app, install the module ZIP from your root manager and reboot. The module places the app in `/system/app` (not `priv-app`, because it does not request privileged permissions). A system app still needs to be tested on the target ROM.
+
+The release build uses the Android debug signing key for convenience/testing. For a public production release, configure a private release keystore and protect its secrets in GitHub Actions.
+
+
+## Important Quick Settings limitation
+
+Android's public `TileService` API does not expose drag/swipe touch events inside a Quick Settings tile, so a custom tile cannot contain a true left/right slider like a built-in system tile. This build uses one tap to cycle Sound → Vibrate → Mute. On Android versions/ROMs that require Notification Policy Access for silent mode, grant it in the app and tap the tile again.

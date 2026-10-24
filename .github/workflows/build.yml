@@ -1,35 +1,43 @@
-name: Build Sound Mode Tile Release APK
-
+name: Build Sound Mode Tile Release
 on:
   push:
     branches: [ main, master ]
   pull_request:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
-
-      - name: Build Release APK
+      - name: Build signed release APK
         run: gradle assembleRelease
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
+      - name: Package Magisk / KernelSU system-app module
+        run: |
+          mkdir -p module/system/app/SoundModeTile
+          cp app/build/outputs/apk/release/app-release.apk module/system/app/SoundModeTile/SoundModeTile.apk
+          cat > module/module.prop <<'PROPEOF'
+          id=soundmodetile
+          name=Sound Mode Tile (System App)
+          version=1.0
+          versionCode=1
+          author=Ashu Developer
+          description=Installs Sound Mode Tile as a system app for Quick Settings.
+          PROPEOF
+          cd module && zip -qr ../SoundModeTile-SystemModule.zip .
+      - uses: actions/upload-artifact@v4
         with:
           name: SoundModeTile-release-apk
           path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SoundModeTile-system-module
+          path: SoundModeTile-SystemModule.zip
           if-no-files-found: error
