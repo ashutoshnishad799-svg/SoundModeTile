@@ -44,3 +44,8 @@ The release build uses the Android debug signing key for convenience/testing. Fo
 ## Important Quick Settings limitation
 
 Android's public `TileService` API does not expose drag/swipe touch events inside a Quick Settings tile, so a custom tile cannot contain a true left/right slider like a built-in system tile. This build uses one tap to cycle Sound → Vibrate → Mute. On Android versions/ROMs that require Notification Policy Access for silent mode, grant it in the app and tap the tile again.
+
+
+## Android 14+ crash fix
+
+The tile now uses `TileService.startActivityAndCollapse(PendingIntent)` on API 34+; the legacy Intent overload is used only on API 26–33. The manifest declares `ACCESS_NOTIFICATION_POLICY`, which is required before the user can grant Do Not Disturb policy access for Silent/Mute mode. After granting access, return to Quick Settings and tap the tile again.
